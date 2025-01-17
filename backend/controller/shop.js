@@ -39,7 +39,7 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
 
     const activationToken = createActivationToken(seller);
 
-    const activationUrl = `https://eshop-tutorial-pyri.vercel.app/seller/activation/${activationToken}`;
+    const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
 
     try {
       await sendMail({
@@ -162,17 +162,40 @@ router.get(
 );
 
 // log out from shop
+// router.get(
+//   "/logout",
+//   catchAsyncErrors(async (req, res, next) => {
+//     try {
+//       res.cookie("seller_token", null, {
+//         expires: new Date(Date.now()),
+//         httpOnly: true,
+//         sameSite: "none",
+//         secure: true,
+//       });
+//       res.status(201).json({
+//         success: true,
+//         message: "Log out successful!",
+//       });
+//     } catch (error) {
+//       return next(new ErrorHandler(error.message, 500));
+//     }
+//   })
+// );
+
 router.get(
   "/logout",
   catchAsyncErrors(async (req, res, next) => {
     try {
+      // Clear the seller_token cookie
       res.cookie("seller_token", null, {
-        expires: new Date(Date.now()),
-        httpOnly: true,
-        sameSite: "none",
-        secure: true,
+        expires: new Date(0), // Set the expiration to the past to clear the cookie
+        httpOnly: true, // Ensures the cookie is not accessible via JavaScript
+        sameSite: "none", // Allow cross-origin requests (necessary for third-party cookies)
+        secure: process.env.NODE_ENV === "production", // Ensure cookies are only sent over HTTPS in production
       });
-      res.status(201).json({
+
+      // Send a success response
+      res.status(200).json({
         success: true,
         message: "Log out successful!",
       });
@@ -181,6 +204,7 @@ router.get(
     }
   })
 );
+
 
 // get shop info
 router.get(
